@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}ShopSphere | Everything You Need, Seamlessly Delivered{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Hero Banner -->
+  <div class="hero-banner mb-5 shadow">
+    <div class="row align-items-center position-relative" style="z-index: 2;">
+      <div class="col-lg-7">
+        <span class="badge bg-warning text-dark fw-bold px-3 py-2 rounded-pill mb-3">
+          <i class="bi bi-fire me-1"></i> Mega Spring Festival 2026
+        </span>
+        <h1 class="display-4 fw-extrabold mb-3" style="letter-spacing: -1px;">
+          Smart Tech, Curated Fashion & Home Essentials
+        </h1>
+        <p class="lead opacity-90 mb-4">
+          Discover over 50+ curated products across 6 departments. Enjoy transparent pricing, lightning express delivery, and instant AI customer assistance.
+        </p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="/products" class="btn btn-primary btn-lg rounded-pill px-4 fw-semibold shadow-sm">
+            <i class="bi bi-bag-fill me-2"></i> Shop Now
+          </a>
+          <a href="/products?category=Electronics" class="btn btn-outline-light btn-lg rounded-pill px-4 fw-semibold">
+            Explore Tech
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-5 d-none d-lg-block text-center">
+        <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80" 
+             alt="Featured Headphones" class="img-fluid rounded-4 shadow-lg" style="max-height: 320px; object-fit: cover;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Shop by Category Grid -->
+  <div class="mb-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <h3 class="fw-bold text-dark mb-1">Browse Categories</h3>
+        <p class="text-muted small mb-0">Explore our wide selection of certified essentials</p>
+      </div>
+      <a href="/products" class="btn btn-sm btn-outline-primary rounded-pill fw-semibold">View All <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+
+    <div class="row g-3" id="categories-grid">
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="/products?category=Electronics" class="category-card shadow-sm">
+          <div class="category-icon-box"><i class="bi bi-laptop"></i></div>
+          <div class="fw-bold">Electronics</div>
+          <div class="small text-muted">Phones, Audio, Laptops</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="/products?category=Fashion" class="category-card shadow-sm">
+          <div class="category-icon-box"><i class="bi bi-bag-heart"></i></div>
+          <div class="fw-bold">Fashion</div>
+          <div class="small text-muted">Men, Women, Shoes</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="/products?category=Home" class="category-card shadow-sm">
+          <div class="category-icon-box"><i class="bi bi-house-door"></i></div>
+          <div class="fw-bold">Home & Kitchen</div>
+          <div class="small text-muted">Appliances & Decor</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="/products?category=Books" class="category-card shadow-sm">
+          <div class="category-icon-box"><i class="bi bi-book"></i></div>
+          <div class="fw-bold">Books</div>
+          <div class="small text-muted">Tech, Fiction, Growth</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="/products?category=Sports" class="category-card shadow-sm">
+          <div class="category-icon-box"><i class="bi bi-bicycle"></i></div>
+          <div class="fw-bold">Sports</div>
+          <div class="small text-muted">Fitness & Outdoors</div>
+        </a>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <a href="/products?category=Beauty" class="category-card shadow-sm">
+          <div class="category-icon-box"><i class="bi bi-stars"></i></div>
+          <div class="fw-bold">Beauty & Care</div>
+          <div class="small text-muted">Skincare & Grooming</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deals of the Day (High Discounts) -->
+  <div class="mb-5 p-4 bg-white rounded-4 border shadow-sm">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+      <div>
+        <span class="badge bg-danger text-uppercase fw-bold px-3 py-1 mb-2">Deal of the Day</span>
+        <h3 class="fw-bold text-dark mb-0"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Hot Steals & Flash Discounts</h3>
+      </div>
+      <div class="mt-2 mt-md-0 text-muted small">
+        <i class="bi bi-clock me-1"></i> Limited stocks remaining at promo pricing
+      </div>
+    </div>
+
+    <div class="row g-3" id="deals-products-container">
+      <div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>
+    </div>
+  </div>
+
+  <!-- Featured Products -->
+  <div class="mb-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <h3 class="fw-bold text-dark mb-1">Top Rated & Featured</h3>
+        <p class="text-muted small mb-0">Highest rated picks loved by our customers</p>
+      </div>
+      <a href="/products?sort_by=rating" class="btn btn-sm btn-outline-primary rounded-pill fw-semibold">Browse Best Rated</a>
+    </div>
+
+    <div class="row g-3" id="featured-products-container">
+      <div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>
+    </div>
+  </div>
+
+  <!-- AI Support Callout Section -->
+  <div class="card border-0 shadow-sm bg-primary-light p-4 rounded-4 mb-5">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <div class="badge bg-primary text-white mb-2 px-3 py-1">24/7 Intelligent Support</div>
+        <h4 class="fw-bold text-dark mb-2">Have a question about an order, return, or laptop specs?</h4>
+        <p class="text-muted mb-0">
+          Our AI Customer-Service Agent can track your package, initiate refunds, verify stock, and help you find products under specific price thresholds.
+        </p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <button class="btn btn-primary btn-lg rounded-pill px-4 shadow" onclick="toggleChatbot()">
+          <i class="bi bi-chat-dots-fill me-2"></i> Chat with AI Assistant
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recently Viewed Products -->
+  <div class="mb-5">
+    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history me-2 text-primary"></i>Recently Viewed Items</h5>
+    <div class="row g-3" id="recently-viewed-container"></div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Render recently viewed
+    renderRecentlyViewed('recently-viewed-container');
+
+    try {
+      const res = await fetch('/api/home-sections');
+      const data = await res.json();
+      if (data.success) {
+        // Render Deals
+        const dealsContainer = document.getElementById('deals-products-container');
+        if (dealsContainer) {
+          dealsContainer.innerHTML = data.deals.slice(0, 4).map(p => createProductCardHtml(p)).join('');
+        }
+
+        // Render Featured
+        const featuredContainer = document.getElementById('featured-products-container');
+        if (featuredContainer) {
+          featuredContainer.innerHTML = data.featured.slice(0, 4).map(p => createProductCardHtml(p)).join('');
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  function createProductCardHtml(p) {
+    const stars = '★'.repeat(Math.round(p.rating)) + '☆'.repeat(5 - Math.round(p.rating));
+    return `
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <div class="product-card">
+          ${p.discount > 0 ? `<span class="discount-badge">${Math.round(p.discount)}% OFF</span>` : ''}
+          <div class="product-img-wrapper">
+            <a href="/products/${p.product_id}">
+              <img src="${p.image}" alt="${p.product_name}">
+            </a>
+          </div>
+          <div class="p-3 d-flex flex-column flex-grow-1">
+            <div class="text-muted small mb-1">${p.category} &bull; ${p.brand}</div>
+            <h6 class="fw-bold text-dark text-truncate mb-2" title="${p.product_name}">
+              <a href="/products/${p.product_id}" class="text-dark text-decoration-none">${p.product_name}</a>
+            </h6>
+            <div class="d-flex align-items-center mb-2 small text-warning">
+              <span class="me-1">${stars}</span>
+              <span class="text-muted small">(${p.review_count})</span>
+            </div>
+            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-bold text-primary fs-5">₹${p.final_price.toLocaleString('en-IN')}</div>
+                ${p.discount > 0 ? `<div class="text-decoration-line-through text-muted small">₹${p.price.toLocaleString('en-IN')}</div>` : ''}
+              </div>
+              <button class="btn btn-sm btn-primary rounded-circle" style="width: 38px; height: 38px;" onclick="quickAddToCart('${p.product_id}')" title="Add to Cart">
+                <i class="bi bi-cart-plus"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+</script>
+{% endblock %}
+

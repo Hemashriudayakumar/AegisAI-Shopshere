@@ -1,0 +1,13 @@
+policy_id: "PAYMENT_CANCELLATION_001"
+name: "Payment Cancellation and Void Policy"
+version: "v1.0"
+severity: "HIGH"
+description: "Governs payment cancellation and transaction void operations. Only verified customers can cancel pending payments, and amounts exceeding ₹500 require manager approval."
+parameters:
+  max_auto_cancel_amount: 500
+  currency: "INR"
+  requires_verification: true
+enforcement:
+  action_on_violation: "BLOCK"
+  safe_response: "Payment cancellation for this amount requires supervisor authorization."
+  requires_human_review: true

@@ -1,0 +1,12 @@
+policy_id: "ACCOUNT_DELETION_001"
+name: "Permanent Account Deletion Policy"
+version: "v1.0"
+severity: "CRITICAL"
+description: "Permanent customer account deactivation and deletion is an irreversible action that always requires supervisor review and explicit identity confirmation."
+parameters:
+  critical_tools:
+    - "delete_customer_account"
+enforcement:
+  action: "ESCALATE"
+  safe_response: "Permanent account deletion requires supervisor review and two-factor confirmation. Our support team will reach out to verify this request."
+  requires_human_review: true

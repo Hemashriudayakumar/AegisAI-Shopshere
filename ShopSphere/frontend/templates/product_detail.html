@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Product Details | ShopSphere{% endblock %}
+
+{% block content %}
+<div class="container py-4" id="product-detail-container">
+  <div class="text-center py-5" id="product-loading">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="text-muted mt-2">Loading product specifications...</p>
+  </div>
+
+  <div id="product-content" class="d-none">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
+        <li class="breadcrumb-item"><a href="/products" class="text-decoration-none">Products</a></li>
+        <li class="breadcrumb-item" id="breadcrumb-category"><a href="#" class="text-decoration-none">Category</a></li>
+        <li class="breadcrumb-item active text-truncate" style="max-width: 280px;" id="breadcrumb-title">Details</li>
+      </ol>
+    </nav>
+
+    <div class="row g-5">
+      <!-- Product Image Column -->
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm p-3 rounded-4 bg-white text-center">
+          <img src="" id="detail-image" class="img-fluid rounded-3" style="max-height: 480px; width: 100%; object-fit: contain;" alt="Product">
+        </div>
+      </div>
+
+      <!-- Product Buy & Specs Column -->
+      <div class="col-lg-6">
+        <div class="mb-2">
+          <span class="badge badge-soft-primary px-3 py-1 fw-bold" id="detail-category">Category</span>
+          <span class="badge bg-light text-dark border px-3 py-1 ms-1" id="detail-brand">Brand</span>
+        </div>
+
+        <h2 class="fw-bold text-dark mb-2" id="detail-name">Product Name</h2>
+
+        <!-- Rating -->
+        <div class="d-flex align-items-center mb-3">
+          <div class="text-warning me-2" id="detail-rating-stars">★★★★★</div>
+          <span class="fw-bold me-2" id="detail-rating">4.8</span>
+          <span class="text-muted small" id="detail-review-count">(120 customer ratings)</span>
+        </div>
+
+        <hr class="my-3">
+
+        <!-- Pricing -->
+        <div class="mb-4">
+          <div class="d-flex align-items-baseline gap-3">
+            <span class="display-6 fw-bold text-primary" id="detail-final-price">₹0</span>
+            <span class="fs-5 text-muted text-decoration-line-through d-none" id="detail-original-price">₹0</span>
+            <span class="badge bg-danger rounded-pill px-3 py-1 fw-bold" id="detail-discount-badge">0% OFF</span>
+          </div>
+          <div class="text-success small fw-semibold mt-1"><i class="bi bi-tag-fill me-1"></i> Inclusive of all taxes</div>
+        </div>
+
+        <!-- Stock Status -->
+        <div class="mb-3" id="detail-stock-box">
+          <span class="badge bg-success px-3 py-2" id="detail-stock-status"><i class="bi bi-check-circle me-1"></i> In Stock (25 available)</span>
+        </div>
+
+        <!-- Description -->
+        <p class="text-muted mb-4" id="detail-description" style="line-height: 1.6;">
+          Product description goes here...
+        </p>
+
+        <!-- Actions: Quantity + Add to Cart + Buy Now -->
+        <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+          <div class="input-group" style="width: 130px;">
+            <button class="btn btn-outline-secondary" type="button" onclick="adjustDetailQty(-1)">-</button>
+            <input type="text" class="form-control text-center" id="detail-qty-input" value="1" readonly>
+            <button class="btn btn-outline-secondary" type="button" onclick="adjustDetailQty(1)">+</button>
+          </div>
+          <button class="btn btn-primary btn-lg rounded-pill px-4 fw-semibold shadow-sm flex-grow-1" id="detail-add-to-cart-btn" onclick="addToCartFromDetail()">
+            <i class="bi bi-cart-plus me-2"></i> Add to Cart
+          </button>
+          <button class="btn btn-dark btn-lg rounded-pill px-4 fw-semibold shadow-sm" onclick="buyNowFromDetail()">
+            Buy Now
+          </button>
+        </div>
+
+        <!-- Delivery & Trust Badges -->
+        <div class="card border bg-light p-3 rounded-3 mb-4">
+          <div class="row g-2 text-center text-md-start">
+            <div class="col-4">
+              <div class="fw-bold small text-dark"><i class="bi bi-truck text-primary me-1"></i> Free Express</div>
+              <div class="text-muted small" style="font-size: 0.72rem;">Delivered in 2-3 Days</div>
+            </div>
+            <div class="col-4 border-start">
+              <div class="fw-bold small text-dark"><i class="bi bi-arrow-counterclockwise text-success me-1"></i> 7 Days Return</div>
+              <div class="text-muted small" style="font-size: 0.72rem;">Hassle-Free Refunds</div>
+            </div>
+            <div class="col-4 border-start">
+              <div class="fw-bold small text-dark"><i class="bi bi-shield-lock text-info me-1"></i> 100% Genuine</div>
+              <div class="text-muted small" style="font-size: 0.72rem;">Verified Seller</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Specifications Table -->
+        <h5 class="fw-bold mb-3">Specifications</h5>
+        <table class="table table-sm table-bordered small">
+          <tbody>
+            <tr><th class="bg-light text-muted w-25">Product Code</th><td id="spec-id">-</td></tr>
+            <tr><th class="bg-light text-muted">Brand</th><td id="spec-brand">-</td></tr>
+            <tr><th class="bg-light text-muted">Department</th><td id="spec-cat">-</td></tr>
+            <tr><th class="bg-light text-muted">Subcategory</th><td id="spec-subcat">-</td></tr>
+            <tr><th class="bg-light text-muted">Verified Seller</th><td id="spec-seller">-</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Related Products -->
+    <div class="mt-5 pt-4 border-top">
+      <h4 class="fw-bold text-dark mb-4">Related Products</h4>
+      <div class="row g-3" id="related-products-grid"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  let currentProduct = null;
+  const productId = "{{ product_id }}";
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res = await fetch(`/api/products/${productId}`);
+      const data = await res.json();
+
+      if (!data.success || !data.product) {
+        document.getElementById('product-loading').innerHTML = '<div class="text-danger fs-5">Product not found.</div>';
+        return;
+      }
+
+      currentProduct = data.product;
+      recordRecentlyViewed(currentProduct);
+
+      // Populate elements
+      document.getElementById('detail-image').src = currentProduct.image;
+      document.getElementById('detail-name').textContent = currentProduct.product_name;
+      document.getElementById('breadcrumb-title').textContent = currentProduct.product_name;
+      document.getElementById('breadcrumb-category').innerHTML = `<a href="/products?category=${encodeURIComponent(currentProduct.category)}" class="text-decoration-none">${currentProduct.category}</a>`;
+      document.getElementById('detail-category').textContent = currentProduct.category;
+      document.getElementById('detail-brand').textContent = currentProduct.brand;
+      document.getElementById('detail-rating').textContent = currentProduct.rating;
+      document.getElementById('detail-review-count').textContent = `(${currentProduct.review_count} customer ratings)`;
+      document.getElementById('detail-rating-stars').textContent = '★'.repeat(Math.round(currentProduct.rating)) + '☆'.repeat(5 - Math.round(currentProduct.rating));
+      document.getElementById('detail-final-price').textContent = `₹${currentProduct.final_price.toLocaleString('en-IN')}`;
+      
+      if (currentProduct.discount > 0) {
+        const origEl = document.getElementById('detail-original-price');
+        origEl.textContent = `₹${currentProduct.price.toLocaleString('en-IN')}`;
+        origEl.classList.remove('d-none');
+        document.getElementById('detail-discount-badge').textContent = `${Math.round(currentProduct.discount)}% OFF`;
+      } else {
+        document.getElementById('detail-discount-badge').classList.add('d-none');
+      }
+
+      document.getElementById('detail-description').textContent = currentProduct.description;
+
+      // Stock
+      const stockBadge = document.getElementById('detail-stock-status');
+      if (currentProduct.in_stock) {
+        stockBadge.className = 'badge bg-success px-3 py-2';
+        stockBadge.innerHTML = `<i class="bi bi-check-circle me-1"></i> In Stock (${currentProduct.stock_quantity} available)`;
+      } else {
+        stockBadge.className = 'badge bg-danger px-3 py-2';
+        stockBadge.innerHTML = `<i class="bi bi-x-circle me-1"></i> Out of Stock`;
+        document.getElementById('detail-add-to-cart-btn').disabled = true;
+      }
+
+      // Specs
+      document.getElementById('spec-id').textContent = currentProduct.product_id;
+      document.getElementById('spec-brand').textContent = currentProduct.brand;
+      document.getElementById('spec-cat').textContent = currentProduct.category;
+      document.getElementById('spec-subcat').textContent = currentProduct.subcategory;
+      document.getElementById('spec-seller').textContent = currentProduct.seller;
+
+      // Related Products
+      const relatedGrid = document.getElementById('related-products-grid');
+      if (data.product.related_products && data.product.related_products.length > 0) {
+        relatedGrid.innerHTML = data.product.related_products.map(p => `
+          <div class="col-6 col-md-3">
+            <div class="product-card">
+              <div class="product-img-wrapper">
+                <a href="/products/${p.product_id}"><img src="${p.image}" alt="${p.product_name}"></a>
+              </div>
+              <div class="p-3">
+                <div class="small text-muted">${p.brand}</div>
+                <h6 class="fw-bold text-dark text-truncate"><a href="/products/${p.product_id}" class="text-dark text-decoration-none">${p.product_name}</a></h6>
+                <div class="fw-bold text-primary">₹${p.final_price.toLocaleString('en-IN')}</div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        relatedGrid.innerHTML = '<p class="text-muted small">No related items found.</p>';
+      }
+
+      // Reveal content
+      document.getElementById('product-loading').classList.add('d-none');
+      document.getElementById('product-content').classList.remove('d-none');
+
+    } catch (err) {
+      console.error(err);
+      document.getElementById('product-loading').innerHTML = '<div class="text-danger">Failed to load product.</div>';
+    }
+  });
+
+  function adjustDetailQty(delta) {
+    const input = document.getElementById('detail-qty-input');
+    let val = parseInt(input.value) + delta;
+    if (val < 1) val = 1;
+    if (currentProduct && val > currentProduct.stock_quantity) val = currentProduct.stock_quantity;
+    input.value = val;
+  }
+
+  async function addToCartFromDetail() {
+    if (!currentProduct) return;
+    const qty = parseInt(document.getElementById('detail-qty-input').value) || 1;
+    await quickAddToCart(currentProduct.product_id, qty);
+  }
+
+  async function buyNowFromDetail() {
+    if (!currentProduct) return;
+    const qty = parseInt(document.getElementById('detail-qty-input').value) || 1;
+    await quickAddToCart(currentProduct.product_id, qty);
+    window.location.href = '/checkout';
+  }
+</script>
+{% endblock %}
+

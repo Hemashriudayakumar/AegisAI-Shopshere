@@ -1,0 +1,22 @@
+policy_id: "HIGH_RISK_ESCALATION_001"
+name: "High-Risk Legal and Fraud Escalation Policy"
+version: "v1.0"
+severity: "CRITICAL"
+description: "Immediately escalates interactions containing fraud accusations, legal threats, police/court mentions, or severe disputes to human supervisors."
+parameters:
+  escalation_keywords:
+    - "fraud"
+    - "scam"
+    - "lawyer"
+    - "legal"
+    - "court"
+    - "sue"
+    - "police"
+    - "consumer court"
+    - "chargeback threat"
+    - "authorities"
+    - "stolen"
+enforcement:
+  decision: "ESCALATE"
+  safe_response: "I have escalated your concern immediately to our senior safety and legal compliance team. A supervisor will contact you directly."
+  requires_human_review: true

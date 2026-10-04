@@ -1,0 +1,13 @@
+policy_id: "REFUND_LIMIT_001"
+name: "Refund Amount Threshold Policy"
+version: "v1.0"
+severity: "HIGH"
+description: "Refunds exceeding ₹500 require prior manager authorization. Lower amounts can be processed automatically for verified customers."
+parameters:
+  max_auto_refund_amount: 500
+  currency: "INR"
+  requires_verification: true
+enforcement:
+  action: "issue_refund"
+  blocked_safe_response: "This refund requires approval from our support team."
+  requires_human_review: true

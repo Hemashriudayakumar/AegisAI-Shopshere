@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Orders | ShopSphere Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-2 border-bottom">
+    <div>
+      <span class="badge bg-danger text-uppercase px-3 py-1 mb-1">Order Pipeline</span>
+      <h3 class="fw-bold text-dark mb-0">All Customer Orders</h3>
+    </div>
+
+    <div class="d-flex gap-2 mt-3 mt-md-0">
+      <a href="/admin" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+        <i class="bi bi-arrow-left me-1"></i> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle small">
+        <thead class="table-light">
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Items</th>
+            <th>Total Amount</th>
+            <th>Payment</th>
+            <th>Status</th>
+            <th class="text-end">Update Status</th>
+          </tr>
+        </thead>
+        <tbody id="admin-orders-table-body">
+          <tr><td colspan="8" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    loadAdminOrders();
+  });
+
+  async function loadAdminOrders() {
+    const tbody = document.getElementById('admin-orders-table-body');
+    try {
+      const res = await fetch('/api/admin/orders?per_page=50');
+      const data = await res.json();
+      if (!data.success || !data.orders) return;
+
+      tbody.innerHTML = data.orders.map(o => `
+        <tr>
+          <td class="fw-bold font-monospace">
+            <a href="/orders/${o.order_id}" class="text-decoration-none">#${o.order_id}</a>
+          </td>
+          <td>
+            <div class="fw-semibold text-dark">${o.customer_name}</div>
+            <div class="text-muted" style="font-size: 0.72rem;">${o.customer_id}</div>
+          </td>
+          <td class="text-muted">${o.order_date || 'N/A'}</td>
+          <td>${o.items.length} item(s)</td>
+          <td class="fw-bold text-primary">₹${o.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+          <td>
+            <span class="badge ${o.payment?.payment_status === 'COMPLETED' ? 'bg-success' : 'bg-warning text-dark'}">
+              ${o.payment?.payment_status || 'PENDING'}
+            </span>
+          </td>
+          <td>
+            <span class="badge badge-soft-primary">${o.order_status}</span>
+          </td>
+          <td class="text-end">
+            <select class="form-select form-select-sm d-inline-block w-auto" onchange="changeOrderStatus('${o.order_id}', this.value)">
+              <option value="">Change Status...</option>
+              <option value="PLACED">PLACED</option>
+              <option value="CONFIRMED">CONFIRMED</option>
+              <option value="PACKED">PACKED</option>
+              <option value="SHIPPED">SHIPPED</option>
+              <option value="OUT_FOR_DELIVERY">OUT_FOR_DELIVERY</option>
+              <option value="DELIVERED">DELIVERED</option>
+              <option value="CANCELLED">CANCELLED</option>
+            </select>
+          </td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function changeOrderStatus(orderId, newStatus) {
+    if (!newStatus) return;
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(`Order #${orderId} updated to ${newStatus}`, 'success');
+        loadAdminOrders();
+      } else {
+        showToast(data.message, 'danger');
+      }
+    } catch (e) {
+      showToast('Error updating status', 'danger');
+    }
+  }
+</script>
+{% endblock %}
+

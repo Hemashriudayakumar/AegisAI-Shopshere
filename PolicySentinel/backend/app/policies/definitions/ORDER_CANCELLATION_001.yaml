@@ -1,0 +1,16 @@
+policy_id: "ORDER_CANCELLATION_001"
+name: "Order Cancellation Policy"
+version: "v1.0"
+severity: "HIGH"
+description: "Governs order cancellation eligibility. Customers must be verified, and orders that are already shipped or delivered cannot be cancelled."
+parameters:
+  forbidden_order_statuses:
+    - "SHIPPED"
+    - "IN_TRANSIT"
+    - "OUT_FOR_DELIVERY"
+    - "DELIVERED"
+    - "COMPLETED"
+enforcement:
+  action_on_violation: "BLOCK"
+  safe_response: "Orders that have already been shipped or delivered cannot be cancelled. You may request a return once delivered."
+  requires_human_review: false

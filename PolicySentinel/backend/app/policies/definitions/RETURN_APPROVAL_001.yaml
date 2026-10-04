@@ -1,0 +1,19 @@
+policy_id: "RETURN_APPROVAL_001"
+name: "Return Request and Approval Policy"
+version: "v1.0"
+severity: "HIGH"
+description: "Governs customer return requests and admin approvals. approve_return always requires human manager review and cannot be automatically executed."
+parameters:
+  escalate_tools:
+    - "approve_return"
+  allowed_reasons:
+    - "Damaged product"
+    - "Wrong product"
+    - "Product not as described"
+    - "Size issue"
+    - "Changed mind"
+    - "Other"
+enforcement:
+  action_on_approve: "ESCALATE"
+  safe_response: "Return approvals require support manager authorization and scheduled pickup confirmation."
+  requires_human_review: true

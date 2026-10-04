@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders | ShopSphere{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+      <h3 class="fw-bold text-dark mb-1"><i class="bi bi-box-seam me-2 text-primary"></i>My Orders</h3>
+      <p class="text-muted small mb-0">View past purchases, track active shipments, or manage returns</p>
+    </div>
+    <a href="/products" class="btn btn-sm btn-outline-primary rounded-pill">
+      <i class="bi bi-plus-lg me-1"></i> Order More
+    </a>
+  </div>
+
+  <!-- Status Filter Tabs -->
+  <div class="mb-4 overflow-x-auto d-flex gap-2 pb-2">
+    <button class="btn btn-sm btn-primary rounded-pill px-3 filter-tab-btn active" onclick="filterOrders('ALL', this)">All Orders</button>
+    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-tab-btn" onclick="filterOrders('PLACED', this)">Placed</button>
+    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-tab-btn" onclick="filterOrders('CONFIRMED', this)">Confirmed</button>
+    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-tab-btn" onclick="filterOrders('SHIPPED', this)">Shipped</button>
+    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-tab-btn" onclick="filterOrders('DELIVERED', this)">Delivered</button>
+    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-tab-btn" onclick="filterOrders('CANCELLED', this)">Cancelled</button>
+    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-tab-btn" onclick="filterOrders('RETURN_REQUESTED', this)">Returns</button>
+  </div>
+
+  <!-- Orders List Container -->
+  <div id="orders-list-container">
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  let allOrders = [];
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadOrders();
+  });
+
+  async function loadOrders(status = 'ALL') {
+    const container = document.getElementById('orders-list-container');
+    try {
+      const res = await fetch(`/api/orders${status !== 'ALL' ? '?status=' + status : ''}`);
+      const data = await res.json();
+      if (!data.success || !data.orders || data.orders.length === 0) {
+        container.innerHTML = `
+          <div class="card border-0 shadow-sm p-5 text-center bg-white rounded-4">
+            <div class="display-3 text-muted mb-3"><i class="bi bi-inbox"></i></div>
+            <h5 class="fw-bold">No orders found</h5>
+            <p class="text-muted small">You don't have any orders with status '${status}'.</p>
+            <div><a href="/products" class="btn btn-primary rounded-pill px-4">Browse Catalogue</a></div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = data.orders.map(o => {
+        let badgeClass = 'badge-soft-primary';
+        if (o.order_status === 'DELIVERED') badgeClass = 'badge-soft-success';
+        else if (o.order_status === 'CANCELLED') badgeClass = 'badge-soft-danger';
+        else if (o.order_status === 'SHIPPED' || o.order_status === 'OUT_FOR_DELIVERY') badgeClass = 'badge-soft-info';
+        else if (o.order_status.includes('RETURN')) badgeClass = 'badge-soft-warning';
+
+        return `
+          <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden bg-white">
+            <!-- Order Header -->
+            <div class="card-header bg-light border-0 py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+              <div class="d-flex flex-wrap align-items-center gap-4 small">
+                <div>
+                  <span class="text-muted d-block" style="font-size: 0.72rem;">ORDER PLACED</span>
+                  <span class="fw-semibold text-dark">${o.order_date || 'N/A'}</span>
+                </div>
+                <div>
+                  <span class="text-muted d-block" style="font-size: 0.72rem;">TOTAL AMOUNT</span>
+                  <span class="fw-bold text-primary">₹${o.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div>
+                  <span class="text-muted d-block" style="font-size: 0.72rem;">SHIP TO</span>
+                  <span class="fw-semibold text-truncate d-inline-block" style="max-width: 140px;">${o.customer_name}</span>
+                </div>
+              </div>
+
+              <div>
+                <span class="text-muted small font-monospace me-2">#${o.order_id}</span>
+                <span class="badge ${badgeClass} px-3 py-1 fs-6">${o.order_status}</span>
+              </div>
+            </div>
+
+            <!-- Order Body & Items -->
+            <div class="card-body p-4">
+              <div class="row align-items-center">
+                <div class="col-lg-8">
+                  ${o.items.map(item => `
+                    <div class="d-flex align-items-center mb-3">
+                      <img src="${item.image}" class="rounded me-3" style="width: 58px; height: 58px; object-fit: cover;" alt="${item.product_name}">
+                      <div>
+                        <h6 class="mb-1 fw-bold"><a href="/products/${item.product_id}" class="text-dark text-decoration-none">${item.product_name}</a></h6>
+                        <div class="text-muted small">Quantity: ${item.quantity} &bull; Price: ₹${item.unit_price.toLocaleString('en-IN')}</div>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+
+                <div class="col-lg-4 text-lg-end border-top border-lg-0 pt-3 pt-lg-0 mt-3 mt-lg-0 d-flex flex-column gap-2">
+                  <a href="/orders/${o.order_id}" class="btn btn-outline-primary rounded-pill btn-sm fw-semibold">
+                    <i class="bi bi-eye me-1"></i> View Order Details
+                  </a>
+                  <a href="/orders/${o.order_id}/track" class="btn btn-primary rounded-pill btn-sm fw-semibold">
+                    <i class="bi bi-geo-alt me-1"></i> Track Shipment
+                  </a>
+                  ${['PLACED', 'CONFIRMED'].includes(o.order_status) ? `
+                    <button class="btn btn-outline-danger rounded-pill btn-sm" onclick="cancelOrderQuick('${o.order_id}')">
+                      Cancel Order
+                    </button>
+                  ` : ''}
+                  ${o.order_status === 'DELIVERED' ? `
+                    <a href="/returns" class="btn btn-outline-secondary rounded-pill btn-sm">
+                      Return or Replace
+                    </a>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (e) {
+      console.error(e);
+      container.innerHTML = '<div class="text-danger py-4">Error loading orders.</div>';
+    }
+  }
+
+  function filterOrders(status, btn) {
+    document.querySelectorAll('.filter-tab-btn').forEach(b => {
+      b.classList.remove('btn-primary', 'active');
+      b.classList.add('btn-outline-secondary');
+    });
+    btn.classList.add('btn-primary', 'active');
+    btn.classList.remove('btn-outline-secondary');
+    loadOrders(status);
+  }
+
+  async function cancelOrderQuick(orderId) {
+    if (!confirm(`Are you sure you want to cancel Order #${orderId}?`)) return;
+    try {
+      const res = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: 'Cancelled by customer via orders list' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        loadOrders();
+      } else {
+        showToast(data.message, 'warning');
+      }
+    } catch (e) {
+      showToast('Error cancelling order', 'danger');
+    }
+  }
+</script>
+{% endblock %}
+

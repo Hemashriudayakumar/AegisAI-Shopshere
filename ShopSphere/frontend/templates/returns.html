@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Returns & Refunds | ShopSphere{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="mb-4 pb-2 border-bottom">
+    <h3 class="fw-bold text-dark mb-1"><i class="bi bi-arrow-counterclockwise me-2 text-primary"></i>Returns & Refunds Center</h3>
+    <p class="text-muted small mb-0">Track return requests, courier pickups, and simulated refunds</p>
+  </div>
+
+  <!-- Policy Highlights Banner -->
+  <div class="card border-0 shadow-sm p-4 rounded-4 mb-4 bg-primary-light">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h5 class="fw-bold text-dark mb-1"><i class="bi bi-shield-check text-primary me-2"></i>7-Day Easy Return Policy</h5>
+        <p class="text-muted small mb-0">
+          Items in original condition are eligible for returns within 7 days of delivery. Free doorstep pickup is arranged by SphereExpress, and mock refunds are credited back to your original payment method.
+        </p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="/orders" class="btn btn-primary rounded-pill px-4 btn-sm fw-semibold">
+          <i class="bi bi-box-seam me-1"></i> View Delivered Orders
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Return Requests List -->
+  <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
+    <h5 class="fw-bold mb-3">Your Return Requests & Refunds</h5>
+    <div id="returns-list-container">
+      <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    loadReturns();
+  });
+
+  async function loadReturns() {
+    const container = document.getElementById('returns-list-container');
+    try {
+      const res = await fetch('/api/orders');
+      const data = await res.json();
+      if (!data.success) {
+        container.innerHTML = '<div class="text-danger">Failed to load returns.</div>';
+        return;
+      }
+
+      const returnOrders = data.orders.filter(o => 
+        o.order_status.includes('RETURN') || o.order_status === 'REFUNDED' || o.refund_status !== 'NONE'
+      );
+
+      if (returnOrders.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-4 text-muted">
+            <div class="display-6 mb-2"><i class="bi bi-check2-circle text-success"></i></div>
+            <p class="mb-0">You currently have no active returns or refund requests.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = returnOrders.map(o => `
+        <div class="card border p-3 rounded-3 mb-3 bg-light">
+          <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+            <div>
+              <span class="fw-bold font-monospace">#${o.order_id}</span>
+              <span class="text-muted small ms-2">${o.order_date}</span>
+            </div>
+            <div>
+              <span class="badge badge-soft-warning px-3 py-1 me-1">${o.order_status}</span>
+              <span class="badge ${o.refund_status === 'PROCESSED' ? 'badge-soft-success' : 'badge-soft-info'} px-3 py-1">
+                REFUND: ${o.refund_status}
+              </span>
+            </div>
+          </div>
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="small text-muted">
+              Total Amount: <strong class="text-dark">₹${o.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong> &bull; 
+              ${o.items.map(i => i.product_name).join(', ')}
+            </div>
+            <a href="/orders/${o.order_id}" class="btn btn-sm btn-outline-primary rounded-pill">
+              Details
+            </a>
+          </div>
+        </div>
+      `).join('');
+
+    } catch (e) {
+      console.error(e);
+      container.innerHTML = '<div class="text-danger py-2">Error loading returns.</div>';
+    }
+  }
+</script>
+{% endblock %}
+

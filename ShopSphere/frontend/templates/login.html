@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In | ShopSphere{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 520px;">
+
+  <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white">
+    <div class="text-center mb-4">
+      <div class="navbar-brand-sphere mb-2">
+        <i class="bi bi-globe-americas me-2 text-primary"></i>Shop<span>Sphere</span>
+      </div>
+      <h4 class="fw-bold text-dark">Welcome Back</h4>
+      <p class="text-muted small">Sign in to access your orders, cart, and profile</p>
+    </div>
+
+    <!-- 1-Click Demo Accounts Quick Sign-In -->
+    <div class="alert alert-light border small mb-4 p-3 rounded-3">
+      <div class="fw-bold text-dark mb-1"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Demo Sign-In</div>
+      <div class="text-muted mb-2" style="font-size: 0.75rem;">Click any demo user below to immediately authenticate:</div>
+      <div class="d-flex flex-wrap gap-1">
+        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" onclick="switchDemoUser('CUS1001')">Rahul (Demo)</button>
+        <button type="button" class="btn btn-sm btn-outline-info rounded-pill" onclick="switchDemoUser('CUS1002')">Priya</button>
+        <button type="button" class="btn btn-sm btn-outline-success rounded-pill" onclick="switchDemoUser('CUS1003')">Amit</button>
+        <button type="button" class="btn btn-sm btn-outline-warning rounded-pill text-dark" onclick="switchDemoUser('CUS1004')">Sneha</button>
+        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="switchDemoUser('CUS1005')">Vikram</button>
+      </div>
+    </div>
+
+    <form onsubmit="handleLogin(event)">
+      <div class="mb-3">
+        <label class="form-label small fw-bold">Email Address</label>
+        <input type="email" id="login-email" class="form-control" value="rahul@example.com" required>
+      </div>
+      <div class="mb-4">
+        <label class="form-label small fw-bold">Password</label>
+        <input type="password" id="login-password" class="form-control" value="password123" required>
+        <div class="form-text small text-muted">All demo user passwords are: <code>password123</code></div>
+      </div>
+      <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-semibold shadow-sm mb-3" id="login-submit-btn">
+        Sign In
+      </button>
+    </form>
+
+    <div class="text-center small text-muted">
+      Don't have an account? <a href="/register" class="fw-semibold text-primary">Register here</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn = document.getElementById('login-submit-btn');
+
+    btn.disabled = true;
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Login successful! Redirecting...', 'success');
+        setTimeout(() => window.location.href = '/', 500);
+      } else {
+        showToast(data.message, 'danger');
+        btn.disabled = false;
+      }
+    } catch (err) {
+      showToast('Network error during login', 'danger');
+      btn.disabled = false;
+    }
+  }
+</script>
+{% endblock %}
+

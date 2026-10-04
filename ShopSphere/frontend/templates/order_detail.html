@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block title %}Order Details & Tracking #{{ order_id }} | ShopSphere{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Breadcrumbs & Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-2 border-bottom">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-1 small">
+          <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
+          <li class="breadcrumb-item"><a href="/orders" class="text-decoration-none">My Orders</a></li>
+          <li class="breadcrumb-item active font-monospace">#{{ order_id }}</li>
+        </ol>
+      </nav>
+      <h3 class="fw-bold text-dark mb-0">Order Details & Tracking</h3>
+    </div>
+
+    <div class="mt-3 mt-md-0 d-flex gap-2">
+      <button class="btn btn-outline-primary rounded-pill btn-sm" onclick="askAiAboutThisOrder()">
+        <i class="bi bi-chat-dots me-1"></i> Ask AI About This Order
+      </button>
+      <a href="/orders" class="btn btn-outline-secondary rounded-pill btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Back to Orders
+      </a>
+    </div>
+  </div>
+
+  <div id="order-loading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+    <div class="text-muted mt-2">Loading shipment checkpoints...</div>
+  </div>
+
+  <div id="order-content" class="d-none">
+    <!-- Visual Tracking Card -->
+    <div class="card border-0 shadow-sm p-4 rounded-4 mb-4 bg-white">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <span class="text-muted small">CARRIER:</span>
+          <span class="fw-bold text-dark ms-1" id="track-carrier">SphereExpress Logistics</span>
+          <span class="badge bg-light text-dark border ms-2 font-monospace" id="track-number">TRK12345678</span>
+        </div>
+        <div>
+          <span class="badge badge-soft-primary px-3 py-1 fs-6" id="track-status-badge">SHIPPED</span>
+        </div>
+      </div>
+
+      <!-- 6-Stage Visual Timeline -->
+      <div class="timeline-track" id="timeline-steps-container">
+        <div class="timeline-step" id="step-placed">
+          <div class="timeline-circle"><i class="bi bi-receipt"></i></div>
+          <div class="timeline-label">Placed</div>
+          <div class="timeline-date" id="date-placed">-</div>
+        </div>
+        <div class="timeline-step" id="step-confirmed">
+          <div class="timeline-circle"><i class="bi bi-check2-circle"></i></div>
+          <div class="timeline-label">Confirmed</div>
+          <div class="timeline-date" id="date-confirmed">-</div>
+        </div>
+        <div class="timeline-step" id="step-packed">
+          <div class="timeline-circle"><i class="bi bi-box-seam"></i></div>
+          <div class="timeline-label">Packed</div>
+          <div class="timeline-date" id="date-packed">-</div>
+        </div>
+        <div class="timeline-step" id="step-shipped">
+          <div class="timeline-circle"><i class="bi bi-truck"></i></div>
+          <div class="timeline-label">Shipped</div>
+          <div class="timeline-date" id="date-shipped">-</div>
+        </div>
+        <div class="timeline-step" id="step-out">
+          <div class="timeline-circle"><i class="bi bi-bicycle"></i></div>
+          <div class="timeline-label">Out for Delivery</div>
+          <div class="timeline-date" id="date-out">-</div>
+        </div>
+        <div class="timeline-step" id="step-delivered">
+          <div class="timeline-circle"><i class="bi bi-house-check"></i></div>
+          <div class="timeline-label">Delivered</div>
+          <div class="timeline-date" id="date-delivered">-</div>
+        </div>
+      </div>
+
+      <div class="alert alert-light border small mb-0 d-flex align-items-center justify-content-between">
+        <div>
+          <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+          <strong>Current Location:</strong> <span id="track-location">In Transit</span>
+        </div>
+        <div>
+          <i class="bi bi-calendar-event text-primary me-1"></i>
+          <strong>Estimated Delivery:</strong> <span id="track-est-date">Within 2 Days</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Items & Invoice Details -->
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <!-- Products Table Card -->
+        <div class="card border-0 shadow-sm p-4 rounded-4 mb-4 bg-white">
+          <h5 class="fw-bold mb-3">Items in this Package</h5>
+          <div id="order-items-list" class="d-flex flex-column gap-3"></div>
+        </div>
+
+        <!-- Cancellation or Return Actions Card -->
+        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white" id="order-actions-card">
+          <h5 class="fw-bold mb-2">Order Options & Support</h5>
+          <p class="text-muted small mb-3">Need to modify, cancel, or initiate a return for this order?</p>
+          <div class="d-flex flex-wrap gap-2" id="order-action-buttons"></div>
+        </div>
+      </div>
+
+      <!-- Shipping & Payment Breakdown -->
+      <div class="col-lg-4">
+        <!-- Delivery Address -->
+        <div class="card border-0 shadow-sm p-4 rounded-4 mb-4 bg-white">
+          <h6 class="fw-bold text-uppercase text-muted small mb-2">Delivery Destination</h6>
+          <div class="fw-bold text-dark mb-1" id="order-recipient-name">Customer Name</div>
+          <div class="text-muted small" id="order-shipping-address">Delivery Address Text</div>
+        </div>
+
+        <!-- Payment & Invoice Summary -->
+        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+          <h6 class="fw-bold text-uppercase text-muted small mb-3">Payment Summary</h6>
+
+          <div class="d-flex justify-content-between mb-2 small">
+            <span class="text-muted">Payment Method:</span>
+            <span class="fw-semibold text-dark" id="order-payment-method">Credit Card</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 small">
+            <span class="text-muted">Payment Status:</span>
+            <span class="badge bg-success" id="order-payment-status">COMPLETED</span>
+          </div>
+
+          <hr class="my-2">
+
+          <div class="d-flex justify-content-between mb-2 small">
+            <span class="text-muted">Subtotal</span>
+            <span class="fw-semibold" id="order-subtotal">₹0.00</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 small">
+            <span class="text-muted">Discount</span>
+            <span class="text-success" id="order-discount">-₹0.00</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 small">
+            <span class="text-muted">Shipping</span>
+            <span class="text-success fw-semibold">FREE</span>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-2">
+            <span class="fw-bold text-dark">Grand Total</span>
+            <span class="fs-5 fw-bold text-primary" id="order-total-amt">₹0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Return Request Modal -->
+<div class="modal fade" id="returnModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-4 border-0">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Request Return for #{{ order_id }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small">Please select the primary reason for requesting a return:</p>
+        <div class="mb-3">
+          <select class="form-select" id="return-reason-select">
+            <option value="Size issue">Size issue / fit is different than expected</option>
+            <option value="Damaged product">Damaged product received</option>
+            <option value="Wrong product">Wrong product delivered</option>
+            <option value="Product not as described">Product not as described</option>
+            <option value="Changed mind">Changed mind</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="alert alert-info small mb-0">
+          <i class="bi bi-info-circle me-1"></i> A courier pickup will be scheduled automatically, and refund will be processed upon approval.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary rounded-pill btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary rounded-pill btn-sm" onclick="submitReturnRequest()">Submit Return</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  window.CURRENT_PAGE_ORDER_ID = "{{ order_id }}";
+  let currentOrder = null;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    loadOrderDetail();
+  });
+
+  async function loadOrderDetail() {
+    try {
+      const res = await fetch(`/api/orders/{{ order_id }}`);
+      const data = await res.json();
+      if (!data.success || !data.order) {
+        document.getElementById('order-loading').innerHTML = '<div class="text-danger fs-5">Order not found or access denied.</div>';
+        return;
+      }
+
+      currentOrder = data.order;
+      populateOrderInfo(currentOrder);
+
+      // Fetch tracking checkpoints
+      const trackRes = await fetch(`/api/delivery/{{ order_id }}/tracking`);
+      const trackData = await trackRes.json();
+      if (trackData.success && trackData.found) {
+        populateTrackingInfo(trackData);
+      }
+
+      document.getElementById('order-loading').classList.add('d-none');
+      document.getElementById('order-content').classList.remove('d-none');
+
+    } catch (e) {
+      console.error(e);
+      document.getElementById('order-loading').innerHTML = '<div class="text-danger">Failed to load order.</div>';
+    }
+  }
+
+  function populateOrderInfo(order) {
+    document.getElementById('track-status-badge').textContent = order.order_status;
+    document.getElementById('order-recipient-name').textContent = order.customer_name;
+    document.getElementById('order-shipping-address').textContent = order.shipping_address_text || 'Standard address';
+    document.getElementById('order-payment-method').textContent = order.payment?.payment_method || 'Credit Card';
+    document.getElementById('order-payment-status').textContent = order.payment?.payment_status || 'COMPLETED';
+    document.getElementById('order-subtotal').textContent = `₹${order.subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+    document.getElementById('order-discount').textContent = `-₹${order.discount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+    document.getElementById('order-total-amt').textContent = `₹${order.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+
+    // Render items
+    const itemsContainer = document.getElementById('order-items-list');
+    itemsContainer.innerHTML = order.items.map(item => `
+      <div class="d-flex align-items-center justify-content-between p-2 rounded border bg-light">
+        <div class="d-flex align-items-center">
+          <img src="${item.image}" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
+          <div>
+            <h6 class="mb-0 fw-bold"><a href="/products/${item.product_id}" class="text-dark text-decoration-none">${item.product_name}</a></h6>
+            <div class="text-muted small">Qty: ${item.quantity} &bull; ₹${item.unit_price.toLocaleString('en-IN')} each</div>
+          </div>
+        </div>
+        <div class="fw-bold fs-6">₹${item.total_price.toLocaleString('en-IN')}</div>
+      </div>
+    `).join('');
+
+    // Actions
+    const actionButtons = document.getElementById('order-action-buttons');
+    let btns = '';
+
+    if (['PLACED', 'CONFIRMED'].includes(order.order_status)) {
+      btns += `<button class="btn btn-outline-danger rounded-pill btn-sm" onclick="cancelCurrentOrder()"><i class="bi bi-x-circle me-1"></i> Cancel Order</button>`;
+    } else if (order.order_status === 'PACKED') {
+      btns += `<span class="badge badge-soft-warning py-2 px-3 small">Packed at warehouse. Cancellation is restricted.</span>`;
+    }
+
+    if (order.order_status === 'DELIVERED') {
+      btns += `<button class="btn btn-outline-warning text-dark rounded-pill btn-sm" data-bs-toggle="modal" data-bs-target="#returnModal"><i class="bi bi-arrow-counterclockwise me-1"></i> Request Return / Refund</button>`;
+    }
+
+    if (order.order_status === 'RETURN_REQUESTED') {
+      btns += `<span class="badge badge-soft-warning py-2 px-3 small"><i class="bi bi-clock-history me-1"></i> Return request under review</span>`;
+    }
+
+    if (order.order_status === 'REFUNDED') {
+      btns += `<span class="badge badge-soft-success py-2 px-3 small"><i class="bi bi-check-circle me-1"></i> Order refunded in full</span>`;
+    }
+
+    btns += `<button class="btn btn-outline-secondary rounded-pill btn-sm" onclick="toggleChatbot()"><i class="bi bi-chat-dots me-1"></i> Chat with AI Assistant</button>`;
+
+    actionButtons.innerHTML = btns;
+  }
+
+  function populateTrackingInfo(track) {
+    document.getElementById('track-carrier').textContent = track.carrier;
+    document.getElementById('track-number').textContent = track.tracking_number;
+    document.getElementById('track-location').textContent = track.current_location || 'In Transit';
+    document.getElementById('track-est-date').textContent = track.estimated_delivery || 'Updating...';
+
+    // Map stages: Placed -> Confirmed -> Packed -> Shipped -> Out -> Delivered
+    const status = track.order_status;
+    const stages = ['PLACED', 'CONFIRMED', 'PACKED', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
+    const currentIdx = stages.indexOf(status);
+
+    const stepElements = [
+      document.getElementById('step-placed'),
+      document.getElementById('step-confirmed'),
+      document.getElementById('step-packed'),
+      document.getElementById('step-shipped'),
+      document.getElementById('step-out'),
+      document.getElementById('step-delivered')
+    ];
+
+    stepElements.forEach((el, idx) => {
+      if (!el) return;
+      el.classList.remove('completed', 'active');
+      if (currentIdx > idx) {
+        el.classList.add('completed');
+      } else if (currentIdx === idx) {
+        el.classList.add('active');
+      }
+    });
+  }
+
+  async function cancelCurrentOrder() {
+    if (!confirm('Are you sure you want to cancel this order?')) return;
+    try {
+      const res = await fetch(`/api/orders/{{ order_id }}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: 'Cancelled by customer' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        loadOrderDetail();
+      } else {
+        showToast(data.message, 'danger');
+      }
+    } catch (e) {
+      showToast('Error cancelling order', 'danger');
+    }
+  }
+
+  async function submitReturnRequest() {
+    const reason = document.getElementById('return-reason-select').value;
+    try {
+      const res = await fetch(`/api/orders/{{ order_id }}/returns`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: reason })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('returnModal'));
+        if (modal) modal.hide();
+        loadOrderDetail();
+      } else {
+        showToast(data.message, 'danger');
+      }
+    } catch (e) {
+      showToast('Error submitting return', 'danger');
+    }
+  }
+
+  function askAiAboutThisOrder() {
+    toggleChatbot();
+    sendSuggestedQuery("What is the status of {{ order_id }}?");
+  }
+</script>
+{% endblock %}
+

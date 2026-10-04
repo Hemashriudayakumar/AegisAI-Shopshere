@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Addresses | ShopSphere{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 860px;">
+
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+      <h3 class="fw-bold text-dark mb-1"><i class="bi bi-geo-alt me-2 text-primary"></i>Saved Delivery Addresses</h3>
+      <p class="text-muted small mb-0">Manage destination addresses for swift 1-click checkout</p>
+    </div>
+    <button class="btn btn-primary btn-sm rounded-pill px-3" data-bs-toggle="collapse" data-bs-target="#new-address-collapse">
+      <i class="bi bi-plus-lg me-1"></i> Add New Address
+    </button>
+  </div>
+
+  <!-- Add New Address Form (Collapsible) -->
+  <div class="collapse mb-4" id="new-address-collapse">
+    <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+      <h5 class="fw-bold mb-3">Add New Address</h5>
+      <form onsubmit="handleCreateAddress(event)">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-bold">Full Name</label>
+            <input type="text" id="addr-name" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold">Phone Number</label>
+            <input type="text" id="addr-phone" class="form-control" required>
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-bold">Address Line</label>
+            <input type="text" id="addr-line" class="form-control" placeholder="House/Flat No, Apartment, Street" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold">City</label>
+            <input type="text" id="addr-city" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold">State</label>
+            <input type="text" id="addr-state" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold">PIN Code</label>
+            <input type="text" id="addr-zip" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-bold">Address Type</label>
+            <select id="addr-type" class="form-select">
+              <option value="Home">Home (7am - 9pm delivery)</option>
+              <option value="Work">Work / Office (9am - 6pm delivery)</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="col-md-6 d-flex align-items-center">
+            <div class="form-check mt-3">
+              <input class="form-check-input" type="checkbox" id="addr-default">
+              <label class="form-check-label small" for="addr-default">Set as default delivery address</label>
+            </div>
+          </div>
+          <div class="col-12 mt-3">
+            <button type="submit" class="btn btn-primary rounded-pill px-4 btn-sm">Save Address</button>
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-3 btn-sm ms-2" data-bs-toggle="collapse" data-bs-target="#new-address-collapse">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Addresses Grid -->
+  <div class="row g-3" id="addresses-container">
+    <div class="col-12 text-center py-4"><div class="spinner-border text-primary"></div></div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    loadUserAddresses();
+  });
+
+  async function loadUserAddresses() {
+    const container = document.getElementById('addresses-container');
+    try {
+      const res = await fetch('/api/customers/addresses');
+      const data = await res.json();
+      if (!data.success || !data.addresses || data.addresses.length === 0) {
+        container.innerHTML = '<div class="col-12 text-muted text-center py-4">No saved addresses found. Add one above!</div>';
+        return;
+      }
+
+      container.innerHTML = data.addresses.map(a => `
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100 position-relative ${a.is_default ? 'border-primary border-2' : ''}">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge ${a.address_type === 'Home' ? 'badge-soft-primary' : 'badge-soft-info'} px-3 py-1">
+                ${a.address_type}
+              </span>
+              ${a.is_default ? '<span class="badge bg-success small">Default</span>' : `
+                <button class="btn btn-sm btn-link text-decoration-none p-0 small" onclick="setDefaultAddress('${a.address_id}')">Set Default</button>
+              `}
+            </div>
+            <h6 class="fw-bold mb-1 text-dark">${a.full_name}</h6>
+            <div class="text-muted small mb-2">${a.formatted}</div>
+            <div class="text-muted small mb-3"><i class="bi bi-telephone me-1"></i> ${a.phone}</div>
+
+            <div class="mt-auto pt-2 border-top d-flex justify-content-end">
+              <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="deleteAddress('${a.address_id}')">
+                <i class="bi bi-trash me-1"></i> Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch (e) {
+      console.error(e);
+      container.innerHTML = '<div class="col-12 text-danger text-center">Error loading addresses.</div>';
+    }
+  }
+
+  async function handleCreateAddress(e) {
+    e.preventDefault();
+    const name = document.getElementById('addr-name').value.trim();
+    const phone = document.getElementById('addr-phone').value.trim();
+    const line = document.getElementById('addr-line').value.trim();
+    const city = document.getElementById('addr-city').value.trim();
+    const state = document.getElementById('addr-state').value.trim();
+    const zip = document.getElementById('addr-zip').value.trim();
+    const type = document.getElementById('addr-type').value;
+    const isDef = document.getElementById('addr-default').checked;
+
+    try {
+      const res = await fetch('/api/customers/addresses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: name,
+          phone: phone,
+          address_line: line,
+          city: city,
+          state: state,
+          postal_code: zip,
+          address_type: type,
+          is_default: isDef
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Address created!', 'success');
+        document.getElementById('new-address-collapse').classList.remove('show');
+        loadUserAddresses();
+      } else {
+        showToast(data.message, 'danger');
+      }
+    } catch (err) {
+      showToast('Error saving address', 'danger');
+    }
+  }
+
+  async function setDefaultAddress(addrId) {
+    try {
+      const res = await fetch(`/api/customers/addresses/${addrId}/default`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Default address updated', 'success');
+        loadUserAddresses();
+      }
+    } catch (e) {
+      showToast('Error updating default address', 'danger');
+    }
+  }
+
+  async function deleteAddress(addrId) {
+    if (!confirm('Delete this address?')) return;
+    try {
+      const res = await fetch(`/api/customers/addresses/${addrId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Address deleted', 'info');
+        loadUserAddresses();
+      } else {
+        showToast(data.message, 'danger');
+      }
+    } catch (e) {
+      showToast('Error deleting address', 'danger');
+    }
+  }
+</script>
+{% endblock %}
+

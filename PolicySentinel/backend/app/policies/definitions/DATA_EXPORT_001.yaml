@@ -1,0 +1,12 @@
+policy_id: "DATA_EXPORT_001"
+name: "Customer Data Export Compliance Policy"
+version: "v1.0"
+severity: "CRITICAL"
+description: "GDPR/DPDP Data Portability Export operations are sensitive and always require human compliance officer review and manual authorization."
+parameters:
+  critical_tools:
+    - "export_customer_data"
+enforcement:
+  action: "ESCALATE"
+  safe_response: "Customer data export requests require secondary identity verification and approval by our privacy and compliance officer."
+  requires_human_review: true

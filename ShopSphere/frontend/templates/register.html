@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Create an Account | ShopSphere{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 540px;">
+
+  <div class="card border-0 shadow-sm p-4 p-md-5 rounded-4 bg-white">
+    <div class="text-center mb-4">
+      <div class="navbar-brand-sphere mb-2">
+        <i class="bi bi-globe-americas me-2 text-primary"></i>Shop<span>Sphere</span>
+      </div>
+      <h4 class="fw-bold text-dark">Join ShopSphere</h4>
+      <p class="text-muted small">Create an account to start shopping and tracking your orders</p>
+    </div>
+
+    <form onsubmit="handleRegister(event)">
+      <div class="mb-3">
+        <label class="form-label small fw-bold">Full Name</label>
+        <input type="text" id="reg-name" class="form-control" placeholder="John Doe" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label small fw-bold">Email Address</label>
+        <input type="email" id="reg-email" class="form-control" placeholder="john@example.com" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label small fw-bold">Phone Number</label>
+        <input type="tel" id="reg-phone" class="form-control" placeholder="+91 9876543210" required>
+      </div>
+      <div class="mb-4">
+        <label class="form-label small fw-bold">Password</label>
+        <input type="password" id="reg-password" class="form-control" placeholder="At least 6 characters" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-semibold shadow-sm mb-3" id="reg-btn">
+        Create Account
+      </button>
+    </form>
+
+    <div class="text-center small text-muted">
+      Already have an account? <a href="/login" class="fw-semibold text-primary">Sign in</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  async function handleRegister(e) {
+    e.preventDefault();
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const phone = document.getElementById('reg-phone').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const btn = document.getElementById('reg-btn');
+
+    btn.disabled = true;
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, email: email, phone: phone, password: password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Registration successful! Welcome to ShopSphere.', 'success');
+        setTimeout(() => window.location.href = '/', 500);
+      } else {
+        showToast(data.message, 'danger');
+        btn.disabled = false;
+      }
+    } catch (err) {
+      showToast('Network error during registration', 'danger');
+      btn.disabled = false;
+    }
+  }
+</script>
+{% endblock %}
+

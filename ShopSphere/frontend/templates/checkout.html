@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout | ShopSphere{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="mb-4 pb-2 border-bottom">
+    <h3 class="fw-bold text-dark mb-0"><i class="bi bi-credit-card-2-front me-2 text-primary"></i>Simulated Checkout</h3>
+    <p class="text-muted small mb-0">Review your shipping destination and simulated mock payment</p>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Address & Payment Steps -->
+    <div class="col-lg-8">
+
+      <!-- Step 1: Select Delivery Address -->
+      <div class="card border-0 shadow-sm p-4 rounded-3 mb-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0">1. Delivery Address</h5>
+          <button class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="collapse" data-bs-target="#new-address-form">
+            <i class="bi bi-plus-lg me-1"></i> Add New Address
+          </button>
+        </div>
+
+        <!-- Add Address Form (Collapsible) -->
+        <div class="collapse mb-3 p-3 bg-light rounded-3" id="new-address-form">
+          <h6 class="fw-bold mb-2">New Address Details</h6>
+          <div class="row g-2">
+            <div class="col-md-6">
+              <input type="text" id="new-addr-name" class="form-control form-control-sm" placeholder="Full Name">
+            </div>
+            <div class="col-md-6">
+              <input type="text" id="new-addr-phone" class="form-control form-control-sm" placeholder="Phone Number">
+            </div>
+            <div class="col-12">
+              <input type="text" id="new-addr-line" class="form-control form-control-sm" placeholder="Address Line (House/Street/Area)">
+            </div>
+            <div class="col-md-4">
+              <input type="text" id="new-addr-city" class="form-control form-control-sm" placeholder="City">
+            </div>
+            <div class="col-md-4">
+              <input type="text" id="new-addr-state" class="form-control form-control-sm" placeholder="State">
+            </div>
+            <div class="col-md-4">
+              <input type="text" id="new-addr-zip" class="form-control form-control-sm" placeholder="PIN / Postal Code">
+            </div>
+          </div>
+          <button class="btn btn-sm btn-primary mt-2" onclick="saveNewAddress()">Save Address</button>
+        </div>
+
+        <!-- Saved Addresses Radios -->
+        <div id="addresses-list-container" class="d-flex flex-column gap-2">
+          <div class="text-muted small">Loading addresses...</div>
+        </div>
+      </div>
+
+      <!-- Step 2: Select Simulated Payment Method -->
+      <div class="card border-0 shadow-sm p-4 rounded-3 mb-4 bg-white">
+        <h5 class="fw-bold mb-2">2. Payment Method (Simulated)</h5>
+        
+        <div class="alert alert-warning d-flex align-items-center small p-2 mb-3" role="alert">
+          <i class="bi bi-shield-exclamation fs-5 me-2"></i>
+          <div>
+            <strong>Safe Simulation Environment:</strong> Do NOT enter real card numbers or banking passwords. All transactions are securely mocked.
+          </div>
+        </div>
+
+        <div class="d-flex flex-column gap-2" id="payment-methods-list">
+          <div class="card p-3 border">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="payment_method" id="pm-card" value="Credit Card" checked>
+              <label class="form-check-label fw-bold" for="pm-card">
+                <i class="bi bi-credit-card me-2 text-primary"></i> Credit / Debit Card (Mock)
+              </label>
+              <div class="mt-2 row g-2">
+                <div class="col-8">
+                  <input type="text" class="form-control form-control-sm" placeholder="4111 2222 3333 4444" value="4111 2222 3333 4444" readonly>
+                </div>
+                <div class="col-2">
+                  <input type="text" class="form-control form-control-sm" placeholder="12/28" value="12/28" readonly>
+                </div>
+                <div class="col-2">
+                  <input type="text" class="form-control form-control-sm" placeholder="123" value="123" readonly>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card p-3 border">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="payment_method" id="pm-upi" value="UPI">
+              <label class="form-check-label fw-bold" for="pm-upi">
+                <i class="bi bi-qr-code-scan me-2 text-success"></i> UPI / Virtual Payment Address
+              </label>
+              <div class="mt-2">
+                <input type="text" class="form-control form-control-sm" placeholder="username@mockbank" value="rahul@mockupi" style="max-width: 320px;">
+              </div>
+            </div>
+          </div>
+
+          <div class="card p-3 border">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="payment_method" id="pm-cod" value="Cash on Delivery">
+              <label class="form-check-label fw-bold" for="pm-cod">
+                <i class="bi bi-cash-stack me-2 text-dark"></i> Cash on Delivery
+              </label>
+              <div class="text-muted small mt-1">Pay with cash when package arrives at your doorstep.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Order Review Summary -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm p-4 rounded-3 bg-white sticky-top" style="top: 90px;">
+        <h5 class="fw-bold mb-3">Order Review</h5>
+
+        <!-- Mini cart items preview -->
+        <div id="checkout-items-preview" class="mb-3 d-flex flex-column gap-2" style="max-height: 240px; overflow-y: auto;">
+          <div class="text-muted small">Loading order items...</div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Subtotal</span>
+          <span class="fw-semibold" id="checkout-subtotal">₹0.00</span>
+        </div>
+
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Delivery Fee</span>
+          <span class="text-success fw-semibold">FREE</span>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4 pt-2 border-top">
+          <span class="fs-5 fw-bold text-dark">Order Total</span>
+          <span class="fs-4 fw-bold text-primary" id="checkout-total">₹0.00</span>
+        </div>
+
+        <button class="btn btn-primary btn-lg w-100 rounded-pill fw-semibold shadow-sm mb-2" id="place-order-btn" onclick="placeSimulatedOrder()">
+          <i class="bi bi-lock-fill me-1"></i> Confirm & Place Order
+        </button>
+
+        <div class="text-center small text-muted">
+          By clicking place order you confirm a simulated purchase.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  let selectedAddressId = null;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    loadAddresses();
+    loadCheckoutCart();
+  });
+
+  async function loadAddresses() {
+    try {
+      const res = await fetch('/api/customers/addresses');
+      const data = await res.json();
+      const container = document.getElementById('addresses-list-container');
+
+      if (!data.success || !data.addresses || data.addresses.length === 0) {
+        container.innerHTML = '<div class="text-warning small">No saved addresses found. Please add an address above.</div>';
+        return;
+      }
+
+      container.innerHTML = data.addresses.map((a, idx) => `
+        <div class="card p-3 border ${a.is_default ? 'border-primary bg-light' : ''}">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="selected_address" id="addr-${a.address_id}" value="${a.address_id}" 
+                   ${a.is_default || idx === 0 ? 'checked' : ''} onchange="selectedAddressId = '${a.address_id}'">
+            <label class="form-check-label w-100" for="addr-${a.address_id}">
+              <div class="fw-bold">${a.full_name} <span class="badge badge-soft-primary ms-1">${a.address_type}</span></div>
+              <div class="text-muted small">${a.formatted}</div>
+              <div class="text-muted small">Phone: ${a.phone}</div>
+            </label>
+          </div>
+        </div>
+      `).join('');
+
+      selectedAddressId = data.addresses.find(a => a.is_default)?.address_id || data.addresses[0].address_id;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function loadCheckoutCart() {
+    try {
+      const res = await fetch('/api/cart');
+      const data = await res.json();
+      const preview = document.getElementById('checkout-items-preview');
+
+      if (!data.success || !data.cart || data.cart.items.length === 0) {
+        preview.innerHTML = '<div class="text-danger small">Your cart is empty. <a href="/products">Shop now</a></div>';
+        document.getElementById('place-order-btn').disabled = true;
+        return;
+      }
+
+      preview.innerHTML = data.cart.items.map(item => `
+        <div class="d-flex align-items-center justify-content-between small">
+          <div class="d-flex align-items-center">
+            <img src="${item.image}" style="width: 38px; height: 38px; object-fit: cover;" class="rounded me-2">
+            <div>
+              <div class="fw-semibold text-truncate" style="max-width: 170px;">${item.product_name}</div>
+              <div class="text-muted">Qty: ${item.quantity} &times; ₹${item.unit_price.toLocaleString('en-IN')}</div>
+            </div>
+          </div>
+          <div class="fw-bold">₹${item.total_price.toLocaleString('en-IN')}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('checkout-subtotal').textContent = `₹${data.cart.subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+      document.getElementById('checkout-total').textContent = `₹${data.cart.subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function saveNewAddress() {
+    const name = document.getElementById('new-addr-name').value.trim();
+    const phone = document.getElementById('new-addr-phone').value.trim();
+    const line = document.getElementById('new-addr-line').value.trim();
+    const city = document.getElementById('new-addr-city').value.trim();
+    const state = document.getElementById('new-addr-state').value.trim();
+    const zip = document.getElementById('new-addr-zip').value.trim();
+
+    if (!name || !phone || !line || !city || !state || !zip) {
+      showToast('Please fill all address fields.', 'warning');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/customers/addresses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: name,
+          phone: phone,
+          address_line: line,
+          city: city,
+          state: state,
+          postal_code: zip,
+          address_type: 'Home',
+          is_default: true
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('New address saved!', 'success');
+        document.getElementById('new-address-form').classList.remove('show');
+        loadAddresses();
+      } else {
+        showToast(data.message, 'danger');
+      }
+    } catch (err) {
+      showToast('Error saving address.', 'danger');
+    }
+  }
+
+  async function placeSimulatedOrder() {
+    const checkedAddr = document.querySelector('input[name="selected_address"]:checked');
+    const addrId = checkedAddr ? checkedAddr.value : selectedAddressId;
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked')?.value || 'Credit Card';
+
+    const btn = document.getElementById('place-order-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing Mock Payment...';
+
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          address_id: addrId,
+          payment_method: paymentMethod
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = `/order-confirmation/${data.order_id}`;
+      } else {
+        showToast(data.message || 'Checkout failed', 'danger');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-lock-fill me-1"></i> Confirm & Place Order';
+      }
+    } catch (err) {
+      showToast('Connection error during checkout.', 'danger');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-lock-fill me-1"></i> Confirm & Place Order';
+    }
+  }
+</script>
+{% endblock %}
+

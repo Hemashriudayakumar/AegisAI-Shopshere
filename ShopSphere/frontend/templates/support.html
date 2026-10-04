@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Help & Customer Support | ShopSphere{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 900px;">
+
+  <!-- Header Banner -->
+  <div class="hero-banner p-4 p-md-5 mb-5 rounded-4 shadow-sm text-center">
+    <span class="badge bg-light text-primary px-3 py-1 rounded-pill mb-2 fw-bold">ShopSphere Support</span>
+    <h2 class="fw-bold mb-2">How can we assist you today?</h2>
+    <p class="lead opacity-90 mb-4" style="font-size: 1.05rem;">
+      Get instant assistance from our 24/7 AI Customer Support Chatbot, or browse through common shopping topics below.
+    </p>
+    <button class="btn btn-light btn-lg rounded-pill px-4 text-primary fw-bold shadow" onclick="toggleChatbot()">
+      <i class="bi bi-chat-dots-fill me-2 text-primary"></i> Launch AI Chat Assistant
+    </button>
+  </div>
+
+  <!-- Common Topics Accordion -->
+  <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
+    <h4 class="fw-bold text-dark mb-3"><i class="bi bi-question-circle me-2 text-primary"></i>Frequently Asked Questions</h4>
+
+    <div class="accordion" id="faqAccordion">
+      <div class="accordion-item border-0 border-bottom">
+        <h2 class="accordion-header" id="headingOne">
+          <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+            How do I track my active order?
+          </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+          <div class="accordion-body small text-muted">
+            You can track your order at any time by visiting <a href="/orders">My Orders</a> and clicking "Track Shipment". Alternatively, you can open our AI Chatbot and simply type <em>"Where is my order?"</em> or <em>"What is the status of ORD1001?"</em> for instant real-time checkpoints.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item border-0 border-bottom">
+        <h2 class="accordion-header" id="headingTwo">
+          <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+            When can I cancel an order?
+          </button>
+        </h2>
+        <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+          <div class="accordion-body small text-muted">
+            Orders in <strong>PLACED</strong> and <strong>CONFIRMED</strong> states can be freely cancelled from your order details page or via the AI Chatbot. Once an order reaches <strong>PACKED</strong>, cancellation is restricted; after <strong>SHIPPED</strong>, cancellation is not possible.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item border-0 border-bottom">
+        <h2 class="accordion-header" id="headingThree">
+          <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+            What is the return & refund policy?
+          </button>
+        </h2>
+        <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+          <div class="accordion-body small text-muted">
+            ShopSphere offers a 7-day hassle-free return guarantee on delivered items. Eligible reasons include damaged product, wrong item, or size issues. Once approved, mock refunds are issued back to the payment method within simulated banking guidelines.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item border-0">
+        <h2 class="accordion-header" id="headingFour">
+          <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+            How does the AI Assistant work?
+          </button>
+        </h2>
+        <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+          <div class="accordion-body small text-muted">
+            Our AI Assistant uses an agentic architecture: it plans structured tool proposals across 23 tools. Every tool call is intercepted by an external policy engine (AegisAI) before any database action is performed. Enable <strong>Dev Mode</strong> in the chat window to view the security interception metadata!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+

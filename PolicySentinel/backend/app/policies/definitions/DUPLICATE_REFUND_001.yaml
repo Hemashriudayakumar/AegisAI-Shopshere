@@ -1,0 +1,11 @@
+policy_id: "DUPLICATE_REFUND_001"
+name: "Duplicate Refund Prevention Policy"
+version: "v1.0"
+severity: "HIGH"
+description: "Prevents issuing multiple refunds for the same order across conversation turns."
+parameters:
+  allow_repeat_refund: false
+enforcement:
+  action: "issue_refund"
+  blocked_safe_response: "A refund has already been issued for this order. Our support team can assist if you have further questions."
+  requires_human_review: true

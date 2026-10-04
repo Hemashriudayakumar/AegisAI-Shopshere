@@ -1,0 +1,11 @@
+policy_id: "REPEATED_COMPLAINT_001"
+name: "Repeated Complaint Escalation Policy"
+version: "v1.0"
+severity: "HIGH"
+description: "Automatically escalates conversations with 3 or more complaints to a senior human support manager."
+parameters:
+  escalation_complaint_threshold: 3
+enforcement:
+  action: "escalate_to_human"
+  blocked_safe_response: "I see you have experienced multiple unresolved issues with this order. I am escalating your case directly to a senior supervisor for immediate review."
+  requires_human_review: true

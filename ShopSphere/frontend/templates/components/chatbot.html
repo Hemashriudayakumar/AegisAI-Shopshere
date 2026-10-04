@@ -1,0 +1,68 @@
+<!-- Floating AI Customer Support Launcher -->
+<button class="chatbot-float-btn shadow" onclick="toggleChatbot()" title="Open ShopSphere AI Support">
+  <i class="bi bi-chat-dots-fill"></i>
+  <span class="chat-badge-pulse"></span>
+</button>
+
+<!-- Collapsible AI Chat Window -->
+<div id="shopsphere-chat-window" class="chat-window hidden">
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="d-flex align-items-center">
+      <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center me-2" style="width: 34px; height: 34px;">
+        <i class="bi bi-robot"></i>
+      </div>
+      <div>
+        <div class="fw-bold mb-0" style="font-size: 0.95rem;">ShopSphere AI Assistant</div>
+        <div class="small opacity-75" style="font-size: 0.72rem;">
+          <i class="bi bi-shield-check text-success"></i> Connected | AegisAI Guard Active
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <!-- Developer Mode Toggle -->
+      <div class="form-check form-switch mb-0" title="Toggle Developer Mode to inspect Tool Calls and AegisAI Policy Interceptions">
+        <input class="form-check-input" type="checkbox" role="switch" id="chat-dev-mode-toggle">
+        <label class="form-check-label text-white small" for="chat-dev-mode-toggle" style="font-size: 0.72rem;">Dev Mode</label>
+      </div>
+      <button type="button" class="btn btn-sm btn-link text-white p-0 fs-5 text-decoration-none" onclick="toggleChatbot()">
+        <i class="bi bi-dash-lg"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages Scroll Area -->
+  <div id="chat-messages-container" class="chat-messages">
+    <div class="d-flex flex-column align-items-start mb-2">
+      <div class="chat-bubble bot">
+        👋 Hello <strong>{{ current_customer_name.split(' ')[0] }}</strong>! I am your AI Customer Support Assistant.<br><br>
+        I can help you check orders, search for products, track delivery, request refunds, or update addresses. What can I help you with today?
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Suggestion Chips Carousel -->
+  <div class="px-3 py-2 bg-white border-top border-bottom overflow-x-auto d-flex gap-2" style="scrollbar-width: thin;">
+    <span class="suggestion-chip" onclick="sendSuggestedQuery('Show me laptops under ₹50,000.')">💻 Laptops under ₹50,000</span>
+    <span class="suggestion-chip" onclick="sendSuggestedQuery('Where is my order?')">🚚 Where is my order?</span>
+    <span class="suggestion-chip" onclick="sendSuggestedQuery('What is the status of ORD1001?')">📦 Status of ORD1001</span>
+    <span class="suggestion-chip" onclick="sendSuggestedQuery('Can I return this product?')">🔄 Can I return this product?</span>
+    <span class="suggestion-chip" onclick="sendSuggestedQuery('I want a refund.')">💰 I want a refund</span>
+    <span class="suggestion-chip" onclick="sendSuggestedQuery('Cancel my order.')">❌ Cancel my order</span>
+    <span class="suggestion-chip" onclick="sendSuggestedQuery('Change my delivery address.')">📍 Change delivery address</span>
+    <span class="suggestion-chip" onclick="sendSuggestedQuery('Is this product in stock?')">🔍 Is this product in stock?</span>
+    <span class="suggestion-chip" onclick="sendSuggestedQuery('Show my recent orders.')">📋 Show recent orders</span>
+  </div>
+
+  <!-- Chat Input Footer -->
+  <div class="p-2 bg-white d-flex align-items-center gap-2">
+    <input type="text" id="chat-user-input" class="form-control form-control-sm rounded-pill px-3" 
+           placeholder="Type your question or request..." autocomplete="off">
+    <button class="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center" 
+            style="width: 36px; height: 36px;" onclick="sendChatMessage()">
+      <i class="bi bi-send-fill"></i>
+    </button>
+  </div>
+</div>
+

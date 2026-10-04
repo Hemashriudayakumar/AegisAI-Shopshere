@@ -1,0 +1,14 @@
+policy_id: "DELIVERY_VERIFICATION_001"
+name: "Delivery Date Verification Policy"
+version: "v1.0"
+severity: "MEDIUM"
+description: "The support agent cannot promise specific delivery dates unless explicitly verified through an official order status lookup."
+parameters:
+  date_patterns:
+    - "\\b\\d{4}-\\d{2}-\\d{2}\\b"
+    - "\\b(January|February|March|April|May|June|July|August|September|October|November|December)\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s*\\d{0,4}\\b"
+    - "\\b\\d{1,2}(?:st|nd|rd|th)?\\s+(January|February|March|April|May|June|July|August|September|October|November|December)\\b"
+    - "\\b(tomorrow|by tomorrow|by Friday|by Monday|in \\d+ days)\\b"
+enforcement:
+  action_on_unverified_promise: "MODIFY"
+  remediation_safe_response: "I can check your estimated delivery date once you provide your verified order ID."

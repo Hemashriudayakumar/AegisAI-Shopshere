@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Catalog | ShopSphere{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Breadcrumbs & Active Filter Heading -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-2 border-bottom">
+    <div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-1 small">
+          <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
+          <li class="breadcrumb-item active">Products</li>
+        </ol>
+      </nav>
+      <h3 class="fw-bold text-dark mb-0" id="catalog-title">Product Catalog</h3>
+    </div>
+
+    <!-- Sorting & Result count -->
+    <div class="d-flex align-items-center gap-3 mt-3 mt-md-0">
+      <span class="text-muted small" id="total-count-badge">Loading...</span>
+      <div class="d-flex align-items-center">
+        <label for="sort-select" class="form-label me-2 mb-0 small fw-bold text-nowrap">Sort By:</label>
+        <select class="form-select form-select-sm" id="sort-select" onchange="applyFilters()">
+          <option value="rating">Top Rated</option>
+          <option value="popularity">Popularity</option>
+          <option value="price_low_to_high">Price: Low to High</option>
+          <option value="price_high_to_low">Price: High to Low</option>
+          <option value="newest">Newest Arrivals</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Filter Sidebar -->
+    <div class="col-lg-3">
+      <div class="card border-0 shadow-sm p-3 mb-4 rounded-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold mb-0"><i class="bi bi-funnel me-1"></i> Filters</h6>
+          <button class="btn btn-sm btn-link text-decoration-none p-0" onclick="resetFilters()">Reset All</button>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="mb-4">
+          <label class="form-label fw-bold small text-uppercase text-muted">Category</label>
+          <div class="d-flex flex-column gap-2" id="category-filter-list">
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="category" value="all" id="cat-all" checked onchange="applyFilters()">
+              <label class="form-check-label" for="cat-all">All Categories</label>
+            </div>
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="category" value="Electronics" id="cat-elec" onchange="applyFilters()">
+              <label class="form-check-label" for="cat-elec">Electronics</label>
+            </div>
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="category" value="Fashion" id="cat-fash" onchange="applyFilters()">
+              <label class="form-check-label" for="cat-fash">Fashion</label>
+            </div>
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="category" value="Home" id="cat-home" onchange="applyFilters()">
+              <label class="form-check-label" for="cat-home">Home & Kitchen</label>
+            </div>
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="category" value="Books" id="cat-books" onchange="applyFilters()">
+              <label class="form-check-label" for="cat-books">Books</label>
+            </div>
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="category" value="Sports" id="cat-sports" onchange="applyFilters()">
+              <label class="form-check-label" for="cat-sports">Sports & Fitness</label>
+            </div>
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="category" value="Beauty" id="cat-beauty" onchange="applyFilters()">
+              <label class="form-check-label" for="cat-beauty">Beauty & Personal Care</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Range Filter -->
+        <div class="mb-4">
+          <label class="form-label fw-bold small text-uppercase text-muted">Price Range</label>
+          <div class="d-flex flex-column gap-2">
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="price_range" value="all" id="pr-all" checked onchange="applyFilters()">
+              <label class="form-check-label" for="pr-all">Any Price</label>
+            </div>
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="price_range" value="0-2000" id="pr-1" onchange="applyFilters()">
+              <label class="form-check-label" for="pr-1">Under ₹2,000</label>
+            </div>
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="price_range" value="2000-10000" id="pr-2" onchange="applyFilters()">
+              <label class="form-check-label" for="pr-2">₹2,000 to ₹10,000</label>
+            </div>
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="price_range" value="10000-50000" id="pr-3" onchange="applyFilters()">
+              <label class="form-check-label" for="pr-3">₹10,000 to ₹50,000</label>
+            </div>
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="price_range" value="50000-999999" id="pr-4" onchange="applyFilters()">
+              <label class="form-check-label" for="pr-4">Above ₹50,000</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Minimum Rating Filter -->
+        <div class="mb-3">
+          <label class="form-label fw-bold small text-uppercase text-muted">Customer Rating</label>
+          <div class="d-flex flex-column gap-2">
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="rating" value="0" id="rate-all" checked onchange="applyFilters()">
+              <label class="form-check-label" for="rate-all">All Ratings</label>
+            </div>
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="rating" value="4.5" id="rate-45" onchange="applyFilters()">
+              <label class="form-check-label text-warning" for="rate-45">★★★★½ <span class="text-dark">4.5 & above</span></label>
+            </div>
+            <div class="form-check small">
+              <input class="form-check-input" type="radio" name="rating" value="4.0" id="rate-4" onchange="applyFilters()">
+              <label class="form-check-label text-warning" for="rate-4">★★★★☆ <span class="text-dark">4.0 & above</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Grid & Pagination -->
+    <div class="col-lg-9">
+      <div class="row g-3" id="products-grid">
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <div class="text-muted mt-2">Loading ShopSphere catalogue...</div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <nav class="mt-5 d-flex justify-content-center" id="pagination-nav"></nav>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  let currentPage = 1;
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialCategory = urlParams.get('category') || 'all';
+  const initialQuery = urlParams.get('q') || '';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check url category
+    if (initialCategory !== 'all') {
+      const radio = document.querySelector(`input[name="category"][value="${initialCategory}"]`);
+      if (radio) radio.checked = true;
+    }
+    if (initialQuery) {
+      document.getElementById('catalog-title').innerHTML = `Search Results for: <span class="text-primary">"${initialQuery}"</span>`;
+    }
+    loadProducts();
+  });
+
+  async function loadProducts(page = 1) {
+    currentPage = page;
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div></div>';
+
+    const category = document.querySelector('input[name="category"]:checked')?.value || 'all';
+    const priceRange = document.querySelector('input[name="price_range"]:checked')?.value || 'all';
+    const minRating = document.querySelector('input[name="rating"]:checked')?.value || '0';
+    const sortBy = document.getElementById('sort-select')?.value || 'rating';
+
+    let minPrice = null;
+    let maxPrice = null;
+    if (priceRange !== 'all') {
+      const parts = priceRange.split('-');
+      minPrice = parts[0];
+      maxPrice = parts[1];
+    }
+
+    let url = `/api/products?page=${page}&per_page=16&sort_by=${sortBy}`;
+    if (category !== 'all') url += `&category=${encodeURIComponent(category)}`;
+    if (minPrice) url += `&min_price=${minPrice}`;
+    if (maxPrice) url += `&max_price=${maxPrice}`;
+    if (parseFloat(minRating) > 0) url += `&min_rating=${minRating}`;
+
+    // If global query exists, we can use search endpoint or product filter
+    if (initialQuery) {
+      url = `/api/products/search?q=${encodeURIComponent(initialQuery)}&limit=30`;
+    }
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      const products = data.products || [];
+
+      document.getElementById('total-count-badge').textContent = `Showing ${products.length} products`;
+
+      if (products.length === 0) {
+        grid.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <div class="display-6 text-muted mb-3"><i class="bi bi-search"></i></div>
+            <h5>No products found</h5>
+            <p class="text-muted small">Try loosening your filter criteria or search for broader keywords.</p>
+            <button class="btn btn-outline-primary btn-sm rounded-pill mt-2" onclick="resetFilters()">Reset Filters</button>
+          </div>
+        `;
+        document.getElementById('pagination-nav').innerHTML = '';
+        return;
+      }
+
+      grid.innerHTML = products.map(p => `
+        <div class="col-12 col-sm-6 col-md-4">
+          <div class="product-card">
+            ${p.discount > 0 ? `<span class="discount-badge">${Math.round(p.discount)}% OFF</span>` : ''}
+            <div class="product-img-wrapper">
+              <a href="/products/${p.product_id}">
+                <img src="${p.image}" alt="${p.product_name}" loading="lazy">
+              </a>
+            </div>
+            <div class="p-3 d-flex flex-column flex-grow-1">
+              <div class="d-flex justify-content-between text-muted small mb-1">
+                <span>${p.category}</span>
+                <span class="stock-tag ${p.in_stock ? 'text-success bg-light' : 'text-danger bg-light'}">
+                  ${p.in_stock ? 'In Stock' : 'Out of Stock'}
+                </span>
+              </div>
+              <h6 class="fw-bold text-dark text-truncate mb-1" title="${p.product_name}">
+                <a href="/products/${p.product_id}" class="text-dark text-decoration-none">${p.product_name}</a>
+              </h6>
+              <div class="text-muted small mb-2">${p.brand}</div>
+              <div class="d-flex align-items-center mb-3 small text-warning">
+                <span>★ ${p.rating}</span>
+                <span class="text-muted ms-1 small">(${p.review_count})</span>
+              </div>
+              <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="fw-bold text-primary fs-5">₹${p.final_price.toLocaleString('en-IN')}</div>
+                  ${p.discount > 0 ? `<div class="text-decoration-line-through text-muted small">₹${p.price.toLocaleString('en-IN')}</div>` : ''}
+                </div>
+                <button class="btn btn-sm btn-primary rounded-circle" style="width: 38px; height: 38px;" onclick="quickAddToCart('${p.product_id}')" title="Add to Cart">
+                  <i class="bi bi-cart-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Build pagination if available
+      if (data.total_pages && data.total_pages > 1) {
+        let pagesHtml = '<ul class="pagination pagination-sm">';
+        for (let i = 1; i <= data.total_pages; i++) {
+          pagesHtml += `<li class="page-item ${i === data.page ? 'active' : ''}"><a class="page-link" href="javascript:void(0)" onclick="loadProducts(${i})">${i}</a></li>`;
+        }
+        pagesHtml += '</ul>';
+        document.getElementById('pagination-nav').innerHTML = pagesHtml;
+      } else {
+        document.getElementById('pagination-nav').innerHTML = '';
+      }
+    } catch (err) {
+      console.error(err);
+      grid.innerHTML = '<div class="col-12 text-center text-danger py-4">Error loading products.</div>';
+    }
+  }
+
+  function applyFilters() {
+    loadProducts(1);
+  }
+
+  function resetFilters() {
+    document.getElementById('cat-all').checked = true;
+    document.getElementById('pr-all').checked = true;
+    document.getElementById('rate-all').checked = true;
+    document.getElementById('sort-select').value = 'rating';
+    if (initialQuery) {
+      window.location.href = '/products';
+    } else {
+      loadProducts(1);
+    }
+  }
+</script>
+{% endblock %}
+

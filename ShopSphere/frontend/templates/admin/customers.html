@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Customers | ShopSphere Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-2 border-bottom">
+    <div>
+      <span class="badge bg-danger text-uppercase px-3 py-1 mb-1">Customer Management</span>
+      <h3 class="fw-bold text-dark mb-0">Registered Shoppers</h3>
+    </div>
+
+    <div class="d-flex gap-2 mt-3 mt-md-0">
+      <a href="/admin" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+        <i class="bi bi-arrow-left me-1"></i> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle small">
+        <thead class="table-light">
+          <tr>
+            <th>Customer</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Orders Count</th>
+            <th>Account Status</th>
+            <th>Joined Date</th>
+            <th class="text-end">Switch Session</th>
+          </tr>
+        </thead>
+        <tbody id="admin-customers-table-body">
+          <tr><td colspan="7" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    loadAdminCustomers();
+  });
+
+  async function loadAdminCustomers() {
+    const tbody = document.getElementById('admin-customers-table-body');
+    try {
+      const res = await fetch('/api/admin/customers');
+      const data = await res.json();
+      if (!data.success || !data.customers) return;
+
+      tbody.innerHTML = data.customers.map(c => `
+        <tr>
+          <td>
+            <div class="fw-bold text-dark">${c.name}</div>
+            <div class="text-muted font-monospace" style="font-size: 0.72rem;">${c.customer_id}</div>
+          </td>
+          <td>${c.email}</td>
+          <td>${c.phone}</td>
+          <td class="fw-bold text-primary">${c.total_orders}</td>
+          <td><span class="badge ${c.account_status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'}">${c.account_status}</span></td>
+          <td class="text-muted">${c.created_at || 'N/A'}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="switchDemoUser('${c.customer_id}')">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Switch User
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      console.error(e);
+    }
+  }
+</script>
+{% endblock %}
+
